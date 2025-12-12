@@ -10,7 +10,11 @@
     "server": "node server/index.js",
     "start": "npm run server"
   },
-  "keywords": ["svelte", "monaco-editor", "file-editor"],
+  "keywords": [
+    "svelte",
+    "monaco-editor",
+    "file-editor"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
@@ -21,6 +25,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
     "monaco-editor": "^0.55.1",
     "multer": "^2.0.2"
   }
