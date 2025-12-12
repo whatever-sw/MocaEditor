@@ -3,7 +3,7 @@
   
   const dispatch = createEventDispatcher();
   
-  let currentPath = $bindable('/');
+  let { currentPath = $bindable('/') } = $props();
   
   let files = $state([]);
   let loading = $state(false);

@@ -4,8 +4,7 @@
   
   const dispatch = createEventDispatcher();
   
-  let content = $bindable('');
-  let filename = $bindable('untitled.txt');
+  let { content = $bindable(''), filename = $bindable('untitled.txt') } = $props();
   
   let editorContainer = $state();
   let editor = $state();
