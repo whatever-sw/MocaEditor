@@ -1,0 +1,27 @@
+{
+  "name": "mocaeditor",
+  "version": "1.0.0",
+  "description": "Web-based file editor with Svelte 5 and Monaco Editor",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node server/index.js",
+    "start": "npm run server"
+  },
+  "keywords": ["svelte", "monaco-editor", "file-editor"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "svelte": "^5.45.10",
+    "vite": "^7.2.7"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "monaco-editor": "^0.55.1",
+    "multer": "^2.0.2"
+  }
+}
