@@ -97,6 +97,12 @@
     if (editor && content !== currentContent) {
       currentContent = content;
       editor.setValue(content);
+    }
+  });
+  
+  // Update language when filename changes
+  $effect(() => {
+    if (editor && filename) {
       const language = getLanguageFromFilename(filename);
       monaco.editor.setModelLanguage(editor.getModel(), language);
     }

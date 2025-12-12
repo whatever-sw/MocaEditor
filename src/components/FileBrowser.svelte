@@ -32,7 +32,6 @@
   function handleFileClick(file) {
     if (file.isDirectory) {
       currentPath = file.path;
-      loadFiles(currentPath);
     } else {
       dispatch('fileSelect', file);
     }
@@ -42,7 +41,6 @@
     const parts = currentPath.split('/').filter(p => p);
     parts.pop();
     currentPath = '/' + parts.join('/');
-    loadFiles(currentPath);
   }
   
   onMount(() => {
@@ -50,9 +48,7 @@
   });
   
   $effect(() => {
-    if (currentPath) {
-      loadFiles(currentPath);
-    }
+    loadFiles(currentPath);
   });
 </script>
 
