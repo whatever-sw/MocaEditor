@@ -39,6 +39,25 @@ npm run preview
 - **Monaco Editor**: Full-featured code editor with syntax highlighting
 - **Save Files**: Click the save button or press Ctrl+S (Cmd+S on Mac)
 - **Multi-language Support**: Automatic syntax highlighting for JavaScript, TypeScript, JSON, Python, Java, and many more
+- **Single File Mode**: Direct file access via URL parameter
+
+## Single File Mode
+
+Access a specific file directly without the file browser:
+
+```
+http://localhost:3000/?file=/path/to/file.js
+```
+
+**Examples:**
+- `http://localhost:3000/?file=/src/App.svelte` - Edit the main App component
+- `http://localhost:3000/?file=/README.md` - Edit the README
+- `http://localhost:3000/?file=/package.json` - Edit package.json
+
+In single file mode:
+- File browser is hidden (full-screen editor)
+- Only the specified file is accessible
+- Great for focused editing or embedding in other tools
 
 ## Security Features
 

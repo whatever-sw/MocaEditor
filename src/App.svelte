@@ -1,10 +1,47 @@
 <script>
+  import { onMount } from 'svelte';
   import FileBrowser from './components/FileBrowser.svelte';
   import Editor from './components/Editor.svelte';
   
   let selectedFile = $state(null);
   let fileContent = $state('');
   let currentPath = $state('/');
+  let singleFileMode = $state(false);
+  let singleFilePath = $state('');
+  
+  onMount(() => {
+    // Check if single file mode is enabled via URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const filePath = urlParams.get('file');
+    
+    if (filePath) {
+      singleFileMode = true;
+      singleFilePath = filePath;
+      loadSingleFile(filePath);
+    }
+  });
+  
+  async function loadSingleFile(filePath) {
+    const fileName = filePath.split('/').pop();
+    selectedFile = {
+      name: fileName,
+      path: filePath,
+      isDirectory: false
+    };
+    
+    try {
+      const response = await fetch(`/api/files/read?path=${encodeURIComponent(filePath)}`);
+      if (response.ok) {
+        const data = await response.json();
+        fileContent = data.content;
+      } else {
+        alert('Failed to load file');
+      }
+    } catch (error) {
+      console.error('Error loading file:', error);
+      alert('Error loading file');
+    }
+  }
   
   async function handleFileSelect(event) {
     const file = event.detail;
@@ -61,15 +98,17 @@
   <div class="container">
     <header>
       <h1>🎨 MocaEditor</h1>
-      <p class="subtitle">Web-based File Editor</p>
+      <p class="subtitle">Web-based File Editor{singleFileMode ? ' - Single File Mode' : ''}</p>
     </header>
     
     <div class="content">
-      <div class="sidebar">
-        <FileBrowser on:fileSelect={handleFileSelect} bind:currentPath />
-      </div>
+      {#if !singleFileMode}
+        <div class="sidebar">
+          <FileBrowser on:fileSelect={handleFileSelect} bind:currentPath />
+        </div>
+      {/if}
       
-      <div class="editor-panel">
+      <div class="editor-panel" class:full-width={singleFileMode}>
         {#if selectedFile}
           <div class="editor-header">
             <span class="file-name">{selectedFile.name}</span>
@@ -147,6 +186,10 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+  
+  .editor-panel.full-width {
+    width: 100%;
   }
   
   .editor-header {

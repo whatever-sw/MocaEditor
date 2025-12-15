@@ -10,6 +10,7 @@ A modern web-based file editor built with **Svelte 5** and **Monaco Editor**. Br
 - 💾 **Save Files**: Edit and save files directly to the server
 - 🎯 **Multi-language Support**: Syntax highlighting for JavaScript, TypeScript, Python, Java, and more
 - ⌨️ **Keyboard Shortcuts**: Ctrl+S (Cmd+S on Mac) to save files
+- 📄 **Single File Mode**: Direct file editing via URL parameter (no file browser)
 
 ## Tech Stack
 
@@ -60,6 +61,26 @@ To create a production build:
 ```bash
 npm run build
 npm run preview
+```
+
+### Single File Mode
+
+You can open MocaEditor directly to a specific file using the `file` URL parameter:
+
+```
+http://localhost:3000/?file=/path/to/file.js
+```
+
+In single file mode:
+- The file browser is hidden
+- Only the specified file can be edited
+- Perfect for quick edits or embedding in other applications
+
+**Example:**
+```
+http://localhost:3000/?file=/src/App.svelte
+http://localhost:3000/?file=/README.md
+http://localhost:3000/?file=/package.json
 ```
 
 ## Project Structure
