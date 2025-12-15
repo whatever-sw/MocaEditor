@@ -1,0 +1,71 @@
+# Example TOML file to showcase syntax highlighting and autocomplete
+# TOML is a configuration file format commonly used in Rust and other projects
+
+[package]
+name = "mocaeditor"
+version = "1.0.0"
+description = "Web-based file editor with Svelte 5 and Monaco Editor"
+authors = ["MocaEditor Contributors"]
+license = "ISC"
+
+[server]
+host = "0.0.0.0"
+port = 3001
+max_connections = 100
+timeout = 30
+
+[server.rate_limit]
+enabled = true
+window_minutes = 15
+max_requests = 100
+
+[security]
+enable_cors = true
+allowed_origins = ["http://localhost:3000", "http://localhost:3001"]
+hidden_files = [".git", ".env", "node_modules"]
+
+[editor]
+theme = "vs-dark"
+font_size = 14
+minimap_enabled = true
+line_numbers = true
+word_wrap = "off"
+
+[editor.features]
+autocomplete = true
+schema_validation = true
+syntax_highlighting = true
+inline_diagnostics = true
+
+# Supported file types
+[[file_types]]
+name = "JavaScript"
+extensions = ["js", "jsx", "mjs"]
+language = "javascript"
+
+[[file_types]]
+name = "TypeScript"
+extensions = ["ts", "tsx"]
+language = "typescript"
+
+[[file_types]]
+name = "JSON"
+extensions = ["json"]
+language = "json"
+schema_validation = true
+
+[[file_types]]
+name = "YAML"
+extensions = ["yaml", "yml"]
+language = "yaml"
+schema_validation = true
+
+[[file_types]]
+name = "TOML"
+extensions = ["toml"]
+language = "toml"
+
+[[file_types]]
+name = "Dockerfile"
+extensions = ["dockerfile"]
+language = "dockerfile"

@@ -1,6 +1,7 @@
 <script>
   import { onMount, createEventDispatcher } from 'svelte';
   import * as monaco from 'monaco-editor';
+  import { configureMonacoYaml } from 'monaco-yaml';
   
   const dispatch = createEventDispatcher();
   
@@ -37,10 +38,107 @@
       'yml': 'yaml',
       'md': 'markdown',
       'sql': 'sql',
-      'svelte': 'html'
+      'svelte': 'html',
+      'toml': 'ini',
+      'dockerfile': 'dockerfile'
     };
     
+    // Special case for Dockerfile
+    if (filename.toLowerCase() === 'dockerfile' || filename.toLowerCase().startsWith('dockerfile.')) {
+      return 'dockerfile';
+    }
+    
     return languageMap[ext] || 'plaintext';
+  }
+  
+  function configureJsonSchemas() {
+    // Configure JSON validation with schemas for common files
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: true,
+      allowComments: true,
+      schemas: [
+        {
+          uri: 'http://json-schema.org/draft-07/schema#',
+          fileMatch: ['package.json'],
+          schema: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', description: 'Package name' },
+              version: { type: 'string', pattern: '^\\d+\\.\\d+\\.\\d+', description: 'Package version (semver)' },
+              description: { type: 'string', description: 'Package description' },
+              main: { type: 'string', description: 'Entry point file' },
+              type: { type: 'string', enum: ['module', 'commonjs'], description: 'Module type' },
+              scripts: { 
+                type: 'object', 
+                description: 'Scripts to run',
+                additionalProperties: { type: 'string' }
+              },
+              dependencies: { 
+                type: 'object',
+                description: 'Production dependencies',
+                additionalProperties: { type: 'string' }
+              },
+              devDependencies: { 
+                type: 'object',
+                description: 'Development dependencies',
+                additionalProperties: { type: 'string' }
+              },
+              keywords: { 
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Package keywords'
+              },
+              author: { type: 'string', description: 'Package author' },
+              license: { type: 'string', description: 'Package license' }
+            },
+            required: ['name', 'version']
+          }
+        },
+        {
+          uri: 'http://json-schema.org/tsconfig',
+          fileMatch: ['tsconfig.json', 'tsconfig.*.json'],
+          schema: {
+            type: 'object',
+            properties: {
+              compilerOptions: {
+                type: 'object',
+                description: 'TypeScript compiler options',
+                properties: {
+                  target: { type: 'string', enum: ['ES3', 'ES5', 'ES6', 'ES2015', 'ES2016', 'ES2017', 'ES2018', 'ES2019', 'ES2020', 'ESNext'] },
+                  module: { type: 'string', enum: ['commonjs', 'amd', 'umd', 'system', 'es6', 'es2015', 'esnext', 'none'] },
+                  lib: { type: 'array', items: { type: 'string' } },
+                  strict: { type: 'boolean' },
+                  esModuleInterop: { type: 'boolean' }
+                }
+              },
+              include: { type: 'array', items: { type: 'string' } },
+              exclude: { type: 'array', items: { type: 'string' } }
+            }
+          }
+        }
+      ]
+    });
+  }
+  
+  function configureYamlSchemas() {
+    // Configure YAML validation
+    configureMonacoYaml(monaco, {
+      enableSchemaRequest: true,
+      hover: true,
+      completion: true,
+      validate: true,
+      format: true,
+      schemas: [
+        {
+          uri: 'https://json.schemastore.org/github-workflow.json',
+          fileMatch: ['.github/workflows/*.yml', '.github/workflows/*.yaml'],
+        },
+        {
+          uri: 'https://json.schemastore.org/docker-compose.json',
+          fileMatch: ['docker-compose.yml', 'docker-compose.yaml'],
+        }
+      ]
+    });
   }
   
   function handleSave() {
@@ -68,6 +166,10 @@
       }
     };
     
+    // Configure schema validation and autocomplete
+    configureJsonSchemas();
+    configureYamlSchemas();
+    
     editor = monaco.editor.create(editorContainer, {
       value: content,
       language: getLanguageFromFilename(filename),
@@ -79,7 +181,16 @@
       fontSize: 14,
       lineNumbers: 'on',
       renderWhitespace: 'selection',
-      scrollBeyondLastLine: false
+      scrollBeyondLastLine: false,
+      quickSuggestions: {
+        other: true,
+        comments: false,
+        strings: true
+      },
+      suggestOnTriggerCharacters: true,
+      acceptSuggestionOnEnter: 'on',
+      tabCompletion: 'on',
+      wordBasedSuggestions: 'matchingDocuments'
     });
     
     // Add save keyboard shortcut (Ctrl+S or Cmd+S)

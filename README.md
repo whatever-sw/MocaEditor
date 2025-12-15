@@ -11,6 +11,10 @@ A modern web-based file editor built with **Svelte 5** and **Monaco Editor**. Br
 - 🎯 **Multi-language Support**: Syntax highlighting for JavaScript, TypeScript, Python, Java, and more
 - ⌨️ **Keyboard Shortcuts**: Ctrl+S (Cmd+S on Mac) to save files
 - 📄 **Single File Mode**: Direct file editing via URL parameter (no file browser)
+- ✅ **Schema Validation**: JSON schema validation with autocomplete for package.json, tsconfig.json
+- 🔧 **YAML Support**: Schema validation and autocomplete for docker-compose.yml, GitHub workflows
+- 📦 **TOML Support**: Syntax highlighting for TOML configuration files
+- 🐳 **Dockerfile Support**: Syntax highlighting and IntelliSense for Dockerfiles
 
 ## Tech Stack
 
