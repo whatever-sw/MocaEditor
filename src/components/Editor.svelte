@@ -10,6 +10,7 @@
   let editorContainer = $state();
   let editor = $state();
   let currentContent = $state(content);
+  let currentFilename = $state(filename);
   
   function getLanguageFromFilename(filename) {
     const ext = filename.split('.').pop().toLowerCase();
@@ -131,11 +132,11 @@
       schemas: [
         {
           uri: 'https://json.schemastore.org/github-workflow.json',
-          fileMatch: ['.github/workflows/*.yml', '.github/workflows/*.yaml'],
+          fileMatch: ['**/workflows/*.yml', '**/workflows/*.yaml', '**/.github/workflows/*.yml', '**/.github/workflows/*.yaml'],
         },
         {
           uri: 'https://json.schemastore.org/docker-compose.json',
-          fileMatch: ['docker-compose.yml', 'docker-compose.yaml'],
+          fileMatch: ['**/docker-compose.yml', '**/docker-compose.yaml', 'docker-compose*.yml', 'docker-compose*.yaml'],
         }
       ]
     });
@@ -147,32 +148,45 @@
   }
   
   onMount(() => {
-    // Configure Monaco Editor
+    // Configure Monaco Environment for workers
     self.MonacoEnvironment = {
-      getWorkerUrl: function (moduleId, label) {
-        if (label === 'json') {
-          return '/monaco-editor/esm/vs/language/json/json.worker.js';
+      getWorker(moduleId, label) {
+        switch (label) {
+          case 'editorWorkerService':
+            return new Worker(new URL('monaco-editor/esm/vs/editor/editor.worker.js', import.meta.url), { type: 'module' });
+          case 'json':
+            return new Worker(new URL('monaco-editor/esm/vs/language/json/json.worker.js', import.meta.url), { type: 'module' });
+          case 'css':
+          case 'scss':
+          case 'less':
+            return new Worker(new URL('monaco-editor/esm/vs/language/css/css.worker.js', import.meta.url), { type: 'module' });
+          case 'html':
+          case 'handlebars':
+          case 'razor':
+            return new Worker(new URL('monaco-editor/esm/vs/language/html/html.worker.js', import.meta.url), { type: 'module' });
+          case 'typescript':
+          case 'javascript':
+            return new Worker(new URL('monaco-editor/esm/vs/language/typescript/ts.worker.js', import.meta.url), { type: 'module' });
+          case 'yaml':
+            // monaco-yaml worker
+            return new Worker(new URL('monaco-yaml/yaml.worker.js', import.meta.url), { type: 'module' });
+          default:
+            return new Worker(new URL('monaco-editor/esm/vs/editor/editor.worker.js', import.meta.url), { type: 'module' });
         }
-        if (label === 'css' || label === 'scss' || label === 'less') {
-          return '/monaco-editor/esm/vs/language/css/css.worker.js';
-        }
-        if (label === 'html' || label === 'handlebars' || label === 'razor') {
-          return '/monaco-editor/esm/vs/language/html/html.worker.js';
-        }
-        if (label === 'typescript' || label === 'javascript') {
-          return '/monaco-editor/esm/vs/language/typescript/ts.worker.js';
-        }
-        return '/monaco-editor/esm/vs/editor/editor.worker.js';
       }
     };
     
-    // Configure schema validation and autocomplete
+    // Configure schema validation and autocomplete before setting up editor
     configureJsonSchemas();
     configureYamlSchemas();
     
+    // Create model with proper URI for schema matching
+    const language = getLanguageFromFilename(filename);
+    const modelUri = monaco.Uri.parse(`file:///${filename}`);
+    const model = monaco.editor.createModel(content, language, modelUri);
+    
     editor = monaco.editor.create(editorContainer, {
-      value: content,
-      language: getLanguageFromFilename(filename),
+      model: model,
       theme: 'vs-dark',
       automaticLayout: true,
       minimap: {
@@ -199,6 +213,7 @@
     });
     
     return () => {
+      model.dispose();
       editor.dispose();
     };
   });
@@ -211,11 +226,20 @@
     }
   });
   
-  // Update language when filename changes
+  // Update language and model URI when filename changes
   $effect(() => {
-    if (editor && filename) {
+    if (editor && filename && filename !== currentFilename) {
+      currentFilename = filename;
       const language = getLanguageFromFilename(filename);
-      monaco.editor.setModelLanguage(editor.getModel(), language);
+      const currentModel = editor.getModel();
+      
+      // Create a new model with the updated URI and language
+      const newModelUri = monaco.Uri.parse(`file:///${filename}`);
+      const newModel = monaco.editor.createModel(currentModel.getValue(), language, newModelUri);
+      
+      // Set the new model and dispose the old one
+      editor.setModel(newModel);
+      currentModel.dispose();
     }
   });
 </script>
